@@ -5,18 +5,18 @@ async function getObj(url) {
 }
 
 async function getDashboardData(query) {
-    const cityCountryPromise = await getObj(`http://localhost:3333/destinations?search=${query}`)
-    const weatherPromise = await getObj(`http://localhost:3333/weathers?search=${query}`)
-    const airportPromise = await getObj(`http://localhost:3333/airports?search=${query}`)
+    const cityCountryPromise = getObj(`http://localhost:3333/destinations?search=${query}`)
+    const weatherPromise = getObj(`http://localhost:3333/weathers?search=${query}`)
+    const airportPromise = getObj(`http://localhost:3333/airports?search=${query}`)
     const promises = [cityCountryPromise, weatherPromise, airportPromise]
-    const [destination, weather, airport] = await Promise.all(promises)
+    const [destination, weather, airport] = await Promise.allSettled(promises)
 
     return {
-        city: destination[0]?.name || null,
-        country: destination[0]?.country || null,
-        temperature: weather[0]?.temperature || null,
-        weather: weather[0]?.weather_description || null,
-        airport: airport[0]?.name || null
+        city: destination.status === 'fulfilled' && destination.value.length > 0 ? destination.value[0].name : null,
+        country: destination.status === 'fulfilled' && destination.value.length > 0 ? destination.value[0].country : null,
+        temperature: weather.status === 'fulfilled' && weather.value.length > 0 ? weather.value[0].temperature : null,
+        weather: weather.status === 'fulfilled' && weather.value.length > 0 ? weather.value[0].weather_description : null,
+        airport: airport.status === 'fulfilled' && airport.value.length > 0 ? airport.value[0].name : null,
     }
 }
 
